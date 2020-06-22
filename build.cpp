@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include "api/api.h"
 #include "defer.h"
+#include "format.h"
 
 #include <win_error.h>
 #include <cstdlib>
@@ -13,7 +14,7 @@ int main(int arg_count, char const** args) {
     path exe_path(_pgmptr);
     path project_path = current_path();
     path linker_search_path(exe_path.parent_path());
-    path builder_output_lib_path(project_path.concat("build_temp.dll"));
+    path builder_output_lib_path(project_path / "build_temp.dll");
 
     auto compiler_exit_code = compile("gcc", linker_search_path, project_path);
     defer(panic_if_win_null(DeleteFileW(builder_output_lib_path.c_str())));
@@ -22,6 +23,8 @@ int main(int arg_count, char const** args) {
         return compiler_exit_code;
     }
     
+    printv("Loading dll %", builder_output_lib_path.string());
+
     using build_func_signature = bool (*)();
     auto lib = panic_if_win_null(LoadLibraryW(builder_output_lib_path.c_str()));
     defer(panic_if_win_null(FreeLibrary(lib)));
