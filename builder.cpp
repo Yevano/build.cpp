@@ -1,6 +1,9 @@
-#include <string>
-#include "api/api.h"
+#include "yevano.cpp/format.h"
 
-extern "C" void build() {
-    run("echo hello");
+#include <string>
+#include <api.h>
+
+extern "C" bool build() {
+    run("echo it works!");
+    return true;
 }

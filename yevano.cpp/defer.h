@@ -1,15 +1,16 @@
 #pragma once
 
-#include <tuple>
+template<typename func>
+struct __defer_struct {
+    func const& __f;
+    __defer_struct(func const& g) : __f(g) { }
+    ~__defer_struct() { __f(); }
+};
 
-#define __defer_helper(code, count, tup)                           \
-struct __defer_struct_##count {                                    \
-    decltype(tup) const& params;                                   \
-    __defer_struct_##count(decltype(tup) const& t) : params(t) { } \
-    ~__defer_struct_##count() { using namespace std; code; }        \
-};                                                                 \
-__defer_struct_##count __defer_variable_##count (tup)
+#define __defer_helper(code, count)                         \
+auto __defer_func_##count = [&]() { code; };                \
+__defer_struct __defer_object_##count(__defer_func_##count)
 
-#define __defer_ind(code, count, tup) __defer_helper(code, count, tup)
+#define __defer_ind(code, count) __defer_helper(code, count)
 
-#define defer(code, ...) __defer_ind(code, __COUNTER__, std::make_tuple(__VA_ARGS__))
+#define defer(code, ...) __defer_ind(code, __COUNTER__)
